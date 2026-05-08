@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: notification-service
+
+server:
+  port: 8088
+
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/notification_service?createDatabaseIfNotExist=true&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  kafka:
+    consumer:
+      group-id: notification-service-group
+      bootstrap-servers: localhost:9092

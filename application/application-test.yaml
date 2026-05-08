@@ -1,0 +1,22 @@
+spring:
+  profiles:
+    active: test
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/banksphere_test?createDatabaseIfNotExist=true&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+    username: test_user
+    password: test_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Use existing schema
+    show-sql: false
+
+logging:
+  level:
+    root: WARN
+    com.cts: INFO

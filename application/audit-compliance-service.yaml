@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: audit-compliance-service
+
+server:
+  port: 8087
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/audit_service?createDatabaseIfNotExist=true&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  kafka:
+    consumer:
+      group-id: audit-service-group
+      bootstrap-servers: localhost:9092

@@ -1,0 +1,49 @@
+spring:
+  profiles:
+    active: prod
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://prod-mysql:3306/banksphere}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 10
+      connection-timeout: 60000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+
+  eureka:
+    client:
+      service-url:
+        defaultZone: ${EUREKA_URL:http://eureka:8761/eureka}
+
+server:
+  port: ${SERVICE_PORT:8080}
+
+logging:
+  level:
+    root: WARN
+    com.cts: INFO
+  file:
+    name: /var/log/banksphere/application.log
+    max-size: 100MB
+    max-history: 90
+
+# Production security
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    shutdown:
+      enabled: false  # Disable shutdown endpoint in prod

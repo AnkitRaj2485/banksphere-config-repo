@@ -1,0 +1,133 @@
+spring:
+  application:
+    name: config-server
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+  # Kafka Configuration (Common for all services)
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: banksphere-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+
+  # Eureka Client Configuration (Common for all services)
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://localhost:8761/eureka
+      fetch-registry: true
+      register-with-eureka: true
+    instance:
+      prefer-ip-address: true
+      instance-id: ${spring.application.name}:${server.port}
+      lease-renewal-interval-in-seconds: 30
+      lease-expiration-duration-in-seconds: 90
+      health-check-url-path: /actuator/health
+
+  # Actuator Configuration
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health,info,metrics,prometheus,refresh
+    endpoint:
+      health:
+        probes:
+          enabled: true
+        group:
+          readiness:
+            include: db,kafka
+          liveness:
+            include: ping
+    metrics:
+      enable:
+        jvm: true
+        process: true
+        system: true
+
+  # Logging Configuration
+  output:
+    ansi:
+      enabled: always
+
+# Resilience4j Configuration (Common for all services)
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 2000
+        wait-duration-in-open-state: 60000
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - feign.FeignException.ServiceUnavailable
+          - feign.RetryableException
+
+  retry:
+    instances:
+      default:
+        max-attempts: 3
+        wait-duration: 500
+        interval-function: exponential
+        exponential-multiplier: 2.0
+        retry-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - feign.RetryableException
+
+  timelimiter:
+    instances:
+      default:
+        timeout-duration: 5000
+        cancel-running-future: true
+
+logging:
+  level:
+    root: INFO
+    com.cts: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.cloud: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId:-}] [%X{userId:-}] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId:-}] [%X{userId:-}] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/banksphere.log
+    max-size: 10MB
+    max-history: 30
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: true
+
+jwt:
+  secret: ${JWT_SECRET:change-me-in-production-use-256-bit-base64}
+  access-token-expiration-ms: 900000  # 15 minutes
+  refresh-token-expiration-ms: 604800000  # 7 days

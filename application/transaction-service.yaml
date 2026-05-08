@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: transaction-service
+
+server:
+  port: 8082
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/transaction_service?createDatabaseIfNotExist=true&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
